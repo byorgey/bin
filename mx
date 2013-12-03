@@ -1,0 +1,7 @@
+#!/bin/sh
+#
+if [ "$USE_X_FORWARDING" == "yes" ]; then
+  exec urxvt-custom -title "Mutt" -e "mutt -f =$*"
+else
+  mutt -f =$*
+fi

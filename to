@@ -1,0 +1,5 @@
+if [ "$USE_X_FORWARDING" == "yes" ]; then
+  urxvt -e mutt $1 &
+else
+  mutt $1
+fi

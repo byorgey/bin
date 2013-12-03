@@ -1,0 +1,3 @@
+#!/bin/sh
+
+urxvt --perl-lib ~/.urxvt -fg lightgrey -bg black +sb $@

@@ -1,0 +1,77 @@
+
+import Data.List
+import Data.Char (toLower)
+
+import Control.Applicative
+
+import System.Environment
+import System.FilePath
+import System.Process
+
+lower = map toLower
+
+x ==> ys = (x, ys)
+
+exts =
+  [ "em" ==>
+    [ "hs"
+    , "lhs"
+    , "txt"
+    , "tex"
+    , "org"
+    , "v"
+    ]
+
+  , "display" ==>
+    [ "png"
+    , "jpg"
+    , "jpeg"
+    , "bmp"
+    , "tiff"
+    , "gif"
+    ]
+
+  , "evince" ==>
+    [ "pdf"
+    ]
+
+  , "gs" ==>
+    [ "ps"
+    ]
+
+  , "inkscape" ==>
+    [ "svg"
+    ]
+
+  , "tar -xvzf" ==>
+    [ "tgz"
+    , "tar.gz"
+    ]
+
+  , "gunzip" ==>
+    [ "gz"
+    ]
+
+  , "tar -xvjf" ==>
+    [ "tar.bz2"
+    ]
+
+  , "tar -xvf" ==>
+    [ "tar"
+    ]
+
+  , "unzip" ==>
+    [ "zip"
+    ]
+  ]
+
+main = do
+  getArgs >>= mapM_ open
+
+open f =
+  case findProg f of
+    Nothing -> putStrLn $ "Don't know what to do with " ++ f
+    Just p  -> const () <$> system (p ++ " '" ++ f ++ "' &")
+
+findProg :: String -> Maybe String
+findProg s = fst <$> find (any (`isSuffixOf` lower s) . snd) exts

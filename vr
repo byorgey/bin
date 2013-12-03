@@ -1,0 +1,1 @@
+xdvi -s 5 -hush -expertmode 0 -watchfile 1 _region_.dvi &

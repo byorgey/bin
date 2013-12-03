@@ -1,0 +1,7 @@
+#!/usr/local/bin/zsh
+if [[ -z $1 ]] then
+  read "time?Time? "
+else
+  time=$1
+fi
+utimer -c $time && echo -en "\007" && sleep 0.2 && echo -en "\007"

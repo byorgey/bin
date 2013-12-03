@@ -1,0 +1,4 @@
+#!/bin/zsh
+
+BASE=$1:r
+ghc --make -fforce-recomp $BASE -o $BASE && ./$BASE -o $BASE.pdf -w 400 -h 400 && (evince $BASE.pdf &) && (./$BASE -o $BASE.pdf -w 400 -h 400 -l)

@@ -1,0 +1,1 @@
+echo "" | mail -s "$1" cases@byorgey.fogbugz.com 

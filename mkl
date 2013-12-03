@@ -1,0 +1,6 @@
+#!/bin/zsh
+while true
+do
+  mk $*
+  sleep 1
+done
