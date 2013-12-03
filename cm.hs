@@ -1,14 +1,14 @@
-{-# LANGUAGE ViewPatterns #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE ViewPatterns        #-}
 
-import System.IO
-import System.Directory
-import System.Process
-import System.FilePath
-import Control.Applicative
-import Control.Monad
+import           Control.Applicative
+import           Control.Exception   (IOException, catch)
+import           System.Directory
+import           System.FilePath
+import           System.IO
+import           System.Process
 
-import Data.Maybe
-
+mailboxesrc, maildir :: String
 mailboxesrc = ".mailboxesrc"
 maildir = "Maildir"
 
@@ -17,6 +17,7 @@ data Box = Box { boxName :: String, boxLoc :: FilePath, new :: Int }
 readBox :: String -> Box
 readBox (words -> [name, loc]) = Box name loc 0
 
+main :: IO ()
 main = do
   hSetBuffering stdout NoBuffering
   home  <- getHomeDirectory
@@ -59,11 +60,11 @@ checkBox dir box = do
   return $ box { new = n }
 
 countNew :: FilePath -> Box -> IO Int
-countNew dir box = countEm `catch` const (return 0)
+countNew dir box = countEm `catch` (\(_ :: IOException) -> return 0)
   where countEm = (subtract 2) . length <$> getDirectoryContents (dir </> boxLoc box </> "new")
 
 showCounts :: [Box] -> String
-showCounts = unlines . zipWith number [1..] . map showCount
+showCounts = unlines . zipWith number [1::Int ..] . map showCount
   where
     number n s = show n ++ ") " ++ s
     showCount (Box name _ n) = name ++ ": " ++ show n
