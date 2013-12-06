@@ -1,8 +1,14 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE ViewPatterns        #-}
 
+-- Depends on lens-datetime package
+
 import           Control.Applicative
 import           Control.Exception   (IOException, catch)
+import           Control.Lens        ((^.))
+import           Control.Monad
+import           Data.Time
+import           Data.Time.Lens
 import           System.Directory
 import           System.FilePath
 import           System.IO
@@ -19,10 +25,14 @@ readBox (words -> [name, loc]) = Box name loc 0
 
 main :: IO ()
 main = do
-  hSetBuffering stdout NoBuffering
-  home  <- getHomeDirectory
-  boxes <- map readBox . lines <$> readFile (home </> mailboxesrc)
-  mainloop home boxes
+  t <- getCurrentTime
+  tz <- getCurrentTimeZone
+  let hrs = t ^. utcInTZ tz . hours
+  when (hrs >= 12) $ do
+    hSetBuffering stdout NoBuffering
+    home  <- getHomeDirectory
+    boxes <- map readBox . lines <$> readFile (home </> mailboxesrc)
+    mainloop home boxes
 
 nonEmpty :: Box -> Bool
 nonEmpty = (>0) . new
