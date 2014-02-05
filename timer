@@ -1,4 +1,4 @@
-#!/usr/local/bin/zsh
+#!/bin/zsh
 if [[ -z $1 ]] then
   read "time?Time? "
 else
