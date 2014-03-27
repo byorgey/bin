@@ -1,12 +1,12 @@
 
-import Data.List
-import Data.Char (toLower)
+import           Data.Char           (toLower)
+import           Data.List
 
-import Control.Applicative
+import           Control.Applicative
 
-import System.Environment
-import System.FilePath
-import System.Process
+import           System.Environment
+import           System.FilePath
+import           System.Process
 
 lower = map toLower
 
@@ -62,6 +62,11 @@ exts =
 
   , "unzip" ==>
     [ "zip"
+    ]
+
+  , "soffice" ==>
+    [ "doc"
+    , "xls"
     ]
   ]
 
