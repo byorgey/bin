@@ -1,0 +1,7 @@
+#!/bin/zsh
+
+PKGLOC=$HOME/.cabal/packages/hackage.haskell.org
+INDEXTAR=00-index.tar.gz
+wget http://hackage.haskell.org/packages/index.tar.gz
+mv index.tar.gz $PKGLOC/$INDEXTAR
+gunzip $PKGLOC/$INDEXTAR
