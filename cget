@@ -1,0 +1,6 @@
+#!/bin/zsh
+
+CACHEDIR=$HOME/.cabal/packages/hackage.haskell.org/$1/$2/
+wget http://hackage.haskell.org/package/$1-$2/$1-$2.tar.gz
+mkdir -p $CACHEDIR
+mv -f $1-$2.tar.gz $CACHEDIR
