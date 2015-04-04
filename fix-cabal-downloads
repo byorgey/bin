@@ -1,0 +1,14 @@
+#!/bin/zsh
+while read line
+do
+  tar tf $line > /dev/null 2>&1
+  if [ $? -ne 0 ]; then
+    echo "Bad .gz file: $line"
+    if [[ $line =~ "hackage\.haskell\.org/([^/]*)/([^/]*)/" ]]; then
+      pkg=$match[1]
+      ver=$match[2]
+      echo "Re-downloading $pkg-$ver..."
+      cget $pkg $ver
+    fi
+  fi
+done
