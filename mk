@@ -8,7 +8,7 @@ done
 
 if [[ `pwd` != $HOME ]] 
 then
-  ghc --make Shake -threaded && ./Shake +RTS -N8 -RTS $1
+  ghc --make Shake -threaded -rtsopts && ./Shake +RTS -N8 -RTS $1
 else
   echo "I can't seem to find a Shake file."
 fi
