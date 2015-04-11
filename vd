@@ -2,6 +2,13 @@
 
 DIR=`pwd`
 
+if [[ `uname -a` =~ "Darwin" ]]
+then
+  VIEWER=open
+else
+  VIEWER=firefox
+fi
+
 while [[ `print -l *.cabal(.N)` == "" && `pwd` != $HOME ]] do
   cd ..
 done
@@ -9,7 +16,7 @@ done
 if [[ `pwd` != $HOME ]] 
 then
   PROJ=`print -l *.cabal(.N) | cut -f1 -d.`
-  firefox "file://`pwd`/dist/doc/html/$PROJ/index.html" &
+  $VIEWER "file://`pwd`/dist/doc/html/$PROJ/index.html" &
 else
   echo "This doesn't seem to be a cabalized project."
 fi
