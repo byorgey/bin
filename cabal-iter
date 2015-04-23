@@ -1,0 +1,15 @@
+#!/bin/zsh
+
+loop=true
+
+while [ "$loop" = true ]; do
+  cabal $@
+  if [ $? -ne 0 ]; then
+    fix-bad-packages
+    if [ $? -eq 0 ]; then
+      loop=false
+    fi
+  else
+    loop=false
+  fi
+done

@@ -1,0 +1,19 @@
+#!/bin/zsh
+
+rc=0
+
+for f in ~/.cabal/packages/hackage.haskell.org/**/*.tar.gz; do
+  tar tf $f > /dev/null 2>&1
+  if [ $? -ne 0 ]; then
+    echo "Bad .gz file: $f"
+    rc=1
+    if [[ $f =~ "hackage\.haskell\.org/([^/]*)/([^/]*)/" ]]; then
+      pkg=$match[1]
+      ver=$match[2]
+      echo "Re-downloading $pkg-$ver..."
+      cget $pkg $ver
+    fi
+  fi
+done
+
+exit $rc
