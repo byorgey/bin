@@ -1,0 +1,3 @@
+#!/bin/zsh
+
+for f in ~/.cabal/packages/hackage.haskell.org/**/*.tar.gz; do tar tf $f > /dev/null 2>&1; if [ $? -ne 0 ]; then echo "Bad: $f"; else echo "OK: $f"; fi; done
