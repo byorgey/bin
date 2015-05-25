@@ -1,0 +1,25 @@
+#!/bin/zsh
+
+rc=0
+
+BASEPKGDIR=/app/cabal/remote-repo-cache/hackage
+
+for f in $BASEPKGDIR/**/*.tar.gz; do
+  tar tf $f > /dev/null 2>&1
+  if [ $? -ne 0 ]; then
+    echo "Bad .gz file: $f"
+    rc=1
+    if [[ $f =~ "hackage/([^/]*)/([^/]*)/" ]]; then
+      pkg=$match[1]
+      ver=$match[2]
+      echo "Re-downloading $pkg-$ver..."
+
+      CACHEDIR=$BASEPKGDIR/$pkg/$ver
+      wget http://hackage.haskell.org/package/$pkg-$ver/$pkg-$ver.tar.gz
+      mkdir -p $CACHEDIR
+      mv -f $pkg-$ver.tar.gz $CACHEDIR
+    fi
+  fi
+done
+
+exit $rc
