@@ -66,6 +66,7 @@ exts =
 
   , "soffice" ==>
     [ "doc"
+    , "docx"
     , "xls"
     ]
   ]
