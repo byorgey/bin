@@ -69,6 +69,12 @@ exts =
     [ "doc"
     , "docx"
     , "xls"
+    , "ods"
+    ]
+
+  , "firefox" ==>
+    [ "html"
+    , "htm"
     ]
   ]
 
