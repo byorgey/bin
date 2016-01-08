@@ -40,10 +40,6 @@ exts =
     [ "ps"
     ]
 
-  , "inkscape" ==>
-    [ "svg"
-    ]
-
   , "tar -xvzf" ==>
     [ "tgz"
     , "tar.gz"
@@ -76,6 +72,7 @@ exts =
   , "firefox" ==>
     [ "html"
     , "htm"
+    , "svg"
     ]
   ]
 
