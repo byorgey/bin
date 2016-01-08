@@ -1,0 +1,6 @@
+#!/bin/zsh
+
+PDF=$1
+OUTPUT="${PDF:r}-spliff.pdf"
+N=`pdftk $1 dump_data | grep NumberOfPages | head -n 1 | cut -d " " -f 2`
+pdftk $1 shuffle 1-$(((N+1)/2)) $(((N+1)/2 + 1))-end output $OUTPUT
