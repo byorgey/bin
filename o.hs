@@ -69,6 +69,7 @@ exts =
     [ "doc"
     , "docx"
     , "xls"
+    , "xlsx"
     , "ods"
     ]
 
