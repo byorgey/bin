@@ -1,0 +1,5 @@
+SIZE=1920x1080
+# SIZE=1280x720
+# SIZE=1024x768
+xrandr --size $SIZE
+xrandr --output HDMI1 --auto --output eDP1 --size $SIZE --same-as HDMI1
