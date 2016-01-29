@@ -92,9 +92,9 @@ intro = (map . first) (+180) algo
 
 main :: IO ()
 main = do
-  [c] <- getArgs
-  case c of
-    "fp"    -> blinkIntervals fp
-    "algo"  -> blinkIntervals algo
-    "intro" -> blinkIntervals intro
-    _       -> putStrLn "Please choose fp, algo, or intro"
+  args <- getArgs
+  case args of
+    ["fp"]    -> blinkIntervals fp
+    ["algo"]  -> blinkIntervals algo
+    ["intro"] -> blinkIntervals intro
+    _         -> putStrLn "Please choose fp, algo, or intro"
