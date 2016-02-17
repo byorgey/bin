@@ -67,6 +67,8 @@ exts =
     , "xls"
     , "xlsx"
     , "ods"
+    , "ppt"
+    , "pptx"
     ]
 
   , "firefox" ==>
