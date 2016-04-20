@@ -1,0 +1,3 @@
+#!/bin/zsh
+
+cabal --sandbox-config-file=$HOME/build/$1/cabal.sandbox.config exec zsh
