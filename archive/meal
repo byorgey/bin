@@ -1,0 +1,156 @@
+#!/usr/bin/perl
+
+open ( mealFILE, "/usr/local/data/meal.dat" ) || die "$!";
+
+%day2num = ( qw(
+		Su 0
+		M  1
+		T  2
+		W  3
+		Th 4
+		F  5
+		S  6
+	    )  );
+
+%m2meal = ( qw(
+	       B  Breakfast
+	       CB Continental
+	       BR Brunch
+	       L  Lunch
+	       D  Dinner
+	       O  Other
+	   )  );
+
+%num2day = ( qw(
+0 Sunday
+1 Monday
+2 Tuesday
+3 Wednesday
+4 Thursday
+5 Friday
+6 Saturday
+		) );
+
+%nextmeal = ();
+
+($wkday, $hour, $min) = split /\s+/, `date +"%w %k %M"`;
+
+$dp = '(?:M|T|W|Th|F|S|Su)';
+$tp = '([01]?\d):(\d\d)';
+
+print "\n";
+
+$searchmeal = '';
+foreach (@ARGV) {
+    if ( /-m(..?)/i ) {
+	$searchmeal = "\U$1";
+    }
+    elsif ( /-t/i ) {
+	$wkday = ($wkday + 1) % 7;
+    }
+    elsif ( /-d(..?)/i ) {
+	$wkday = $day2num{$1};
+    }
+    elsif ( /--help/ ) {
+print<<END_HELP;
+Usage: meal [--help] [-m<M>] [-t | -d<D>]
+
+By default, meal prints out the next meal for each dining hall.
+Using the -m<M> option will search for a specific meal, where
+  <M> is one of: B CB BR L D A
+Using -mA will search for all meals on a given day.
+
+By default, meals for today are printed; this can be changed
+  by specifying the -t option (tomorrow), or the -d<D> option, 
+  where <D> is one of: Su M T W Th F S.
+
+For example, "meal -mb -dTh" would print information about 
+breakfast on Thursdays.
+END_HELP
+
+    exit;
+    }
+
+}
+
+if ( $searchmeal ne '' ) {
+    if ( $searchmeal eq 'A' ) {
+	print "All meals for $num2day{$wkday}:\n";
+    }
+    else {
+	print "$m2meal{$searchmeal} $num2day{$wkday}:\n\n";
+    }
+}
+else {
+    print "Next meals:\n\n";
+}
+
+while ( <mealFILE> ) {
+    chomp;
+    s/^\s*//;
+    s/\s+/ /g;
+    if ( /^h (.*)/ ) {
+	$curhall = $1;
+    }
+    elsif ( /^m (.*)/ ) {
+	$curmeal = $1;
+    }
+    elsif ( /^: ?($dp(?:-$dp)?) $tp-$tp/ ) {
+	$days = $1; 
+	$starthr = $2; 
+	$startmin = $3; 
+	$endhr = $4;
+	$endmin = $5;
+
+	$endmin2 = $endmin;
+	$endmin2 =~ s/^0//;
+
+	$starthr2 = $starthr;
+	$starthr2 -= 12 if ( $starthr2 > 12 );
+
+	$endhr2 = $endhr;
+	$endhr2 -= 12 if ( $endhr2 > 12 );
+
+	if ( $days =~ /^($dp)$/ ) {
+	    $startday = $day2num{$1}; 
+	    $endday = $startday;
+	}
+	else {
+	    $days =~ /^($dp)-($dp)$/;
+	    $startday = $day2num{$1};
+	    $endday = $day2num{$2};
+	}
+	if ( ($startday <= $wkday && $wkday <= $endday) ||
+	     ($endday <= $wkday && $wkday <= $startday) ) {
+	    $mealstr = "  $curhall: $starthr2:$startmin - $endhr2:$endmin\n";
+	    if ( $curmeal eq $searchmeal ) {
+		print $mealstr;
+	    }
+	    elsif ( $searchmeal eq 'A' ) {
+		$meals{$curmeal} .= $mealstr;
+	    }
+	    elsif ( $searchmeal eq '' 
+                    && ($endhr > $hour || ($endhr == $hour && $endmin2 > $min))
+		    && ( ! defined($nextmeal{$curhall}) ) 
+		    ) {
+		print "  $m2meal{$curmeal} \@$mealstr";
+		$nextmeal{$curhall} = 'x';
+	    }
+	}		     
+    }
+}
+
+if ( $searchmeal eq 'A' ) {
+    foreach ((B,CB,BR,L,D,O)) {
+	if ( defined($meals{$_}) ) {
+	    print "\n$m2meal{$_}:\n";
+	    print $meals{$_};
+	}
+    }
+}
+
+print "\n";
+
+
+
+

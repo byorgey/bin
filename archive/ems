@@ -1,0 +1,2 @@
+sudo -v
+sudo emacs -name $1 $1 &

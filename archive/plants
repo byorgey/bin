@@ -1,0 +1,5 @@
+#!/bin/sh
+
+cd ~/school/bio/220
+./plant_quiz.pl $1
+cd -

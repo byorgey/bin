@@ -1,0 +1,26 @@
+#!/usr/bin/perl
+
+open ( filelist, "/etc/backup" ) || die "Can't open /etc/backup: $!";
+
+chomp($backup_file = <filelist>);
+
+while ( <filelist> ) {
+  chomp;
+  if ( /\{(.*)\}/ ) {
+    foreach $alt ( split /,/, $1 ) {
+      $elt = $_;
+      $elt =~ s/\{.*\}/$alt/;
+      $tarball .= "'$elt' ";
+    }
+  } else {
+    $tarball .= "'$_' ";
+  }
+}
+
+#print $tarball;
+
+system "tar -cvPzf $backup_file $tarball";
+
+
+
+  

@@ -1,0 +1,23 @@
+#!/usr/bin/perl -w
+
+use strict;
+
+use CGI qw(:standard);
+use CGI::Carp qw(fatalsToBrowser);
+
+use DBI;
+
+my $dbh = DBI->connect (
+  "DBI:mysql:database=byorgey;host=ethel.williams.edu",
+  'byorgey',
+  'g5BhI2'
+			) or die "Can't connect to database: $!";
+
+my $message = $ARGV[0];
+
+my $q = "UPDATE wheresbrent SET message='$message'";
+my $qh = $dbh->prepare($q);
+$qh->execute();
+$qh->finish();
+
+$dbh->disconnect();

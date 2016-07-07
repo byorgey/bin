@@ -1,0 +1,14 @@
+#!/usr/bin/perl
+
+@lunchpage = `lynx -dump http://wso.williams.edu/`;
+
+$i = 0;
+
+while ( $lunchpage[$i] !~ /menu_title/ ) {
+  $i++;
+}
+$i += 3;
+while ( $lunchpage[$i] !~ /if this menu/ ) {
+  print $lunchpage[$i];
+  $i++;
+}

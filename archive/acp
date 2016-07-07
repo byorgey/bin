@@ -1,0 +1,2 @@
+cp /home/bj/brent/creating/j/1-anniversary/images3/small/$1 /var/www/anniversary/images/$2.jpg
+chmod o+r /var/www/anniversary/images/$2.jpg

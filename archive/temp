@@ -1,0 +1,14 @@
+#!/usr/bin/perl
+
+open (weatherFILE, '-|', 'lynx -source http://www.wunderground.com/US/MA/Williamstown.html');
+
+while (<weatherFILE>) {
+  if ( m[<b>(\d+)</b>] ) {
+    open ( outFILE, '>', '/home/brent/misc/temp.dat');
+    print outFILE "$1\n";
+    close outFILE;
+    exit;
+  }
+}
+
+close weatherFILE;

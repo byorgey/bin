@@ -1,0 +1,6 @@
+#!/usr/bin/perl
+
+while (<>) {
+  tr/a-z/A-Z/;
+  print;
+}

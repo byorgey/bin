@@ -1,0 +1,12 @@
+#!/usr/bin/perl
+
+$counter = 0;
+while ( <STDIN> ) {
+  $counter++;
+  if ( $ARGV[0] =~ /x/i ) {
+    printf "%-3X ", $counter;
+  } else {
+    printf "%-3d ", $counter;
+  }
+  print;
+}

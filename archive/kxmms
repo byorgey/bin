@@ -1,0 +1,5 @@
+#!/usr/bin/perl
+
+@xmmsInfo = `ps -A | grep xmms`;
+$xmmsInfo[0] =~ /(\d+) /;
+exec ( "kill $1" );

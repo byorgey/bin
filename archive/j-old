@@ -1,0 +1,7 @@
+emacs ~/docs/joyia/joyia.tex
+cd ~/docs/joyia ; latex joyia.tex ; cd -
+cp ~/docs/joyia/joyia.tex ~/docs/joyia/j.tex
+gzip -f ~/docs/joyia/j.tex
+scp ~/docs/joyia/j.tex.gz byorgey@wso.williams.edu:home-comp/
+cp ~/docs/joyia/j.tex.gz /homer/brent/backup/
+wc -w ~/docs/joyia/joyia.tex
