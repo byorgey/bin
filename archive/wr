@@ -1,0 +1,19 @@
+#!/usr/bin/perl
+
+system "lynx -dump 'http://www.w3.weather.com/weather/local/01267' > /tmp/wr.tmp";
+
+open ( wrFILE, "/tmp/wr.tmp" ) || die "Can't open /tmp/wr.tmp: $!";
+open ( tempFILE, ">/home/brent/misc/temp.dat" ) || die "Can't open /home/brent/misc/temp.dat for writing: $!";
+
+while ( $w = <wrFILE> ) {
+
+  if ( $w =~ /Current Conditions/ ) {
+    $w = <wrFILE>;
+    $w = <wrFILE>;
+    $w =~ m/(-?\d+)/;
+    print tempFILE "$1F";
+    close tempFILE;
+    close wrFILE;
+    exit;
+  }
+}

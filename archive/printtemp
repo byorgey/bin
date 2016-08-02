@@ -1,0 +1,9 @@
+#!/usr/bin/perl
+
+open ( tempFILE, "/home/brent/misc/temp.dat" );
+
+chomp($temp = <tempFILE>);
+
+close ( tempFILE );
+
+print "$temp";

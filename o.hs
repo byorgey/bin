@@ -34,6 +34,7 @@ exts =
   , "evince" ==>
     [ "pdf"
     , "djvu"
+    , "dvi"
     ]
 
   , "gs" ==>

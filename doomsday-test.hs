@@ -23,7 +23,7 @@ showDay = formatTime defaultTimeLocale "%B %-d, %Y"
 doomsdayTest :: IO (Bool, NominalDiffTime)
 doomsdayTest = runTest randomDay showDay
   (\guess d ->
-     ( (map toUpper guess `isPrefixOf` map toUpper (weekday d)) || (guess == weekdayNum d)
+     ( let g = map toUpper guess in (length g > 1 && g `isPrefixOf` map toUpper (weekday d)) || (guess == weekdayNum d)
      , weekday d
      )
   )

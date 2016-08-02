@@ -1,0 +1,3 @@
+#!/bin/zsh
+
+ffmpeg -f x11grab -r 10 -s 1280x720 -i :0.0 -vcodec flashsv -sameq $1

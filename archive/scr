@@ -1,0 +1,1 @@
+screen -c ~/brent/.$1-screenrc -S $1

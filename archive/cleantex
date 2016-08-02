@@ -1,0 +1,18 @@
+#!/usr/bin/perl
+
+@texjunk = qw( .aux .log .dvi .ps .pdf .tex~ .ltx~ .bbl .blg .toc );
+
+@texfiles = `find . -name '*.tex' -or -name '*.ltx'`;
+
+foreach $texfile ( @texfiles ) {
+  chomp $texfile;
+  foreach $ext ( @texjunk ) {
+    $junkfile = $texfile;
+    $junkfile =~ s/\.tex|\.ltx$/$ext/;
+
+    if ( -e $junkfile ) {
+      unlink($junkfile);
+    }
+  }
+}
+    

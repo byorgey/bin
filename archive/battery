@@ -1,0 +1,15 @@
+#!/usr/bin/perl
+
+while (1) {
+  system('clear');
+
+  ($pct) = (`apm` =~ /(\d{1,2})%/);
+
+  printf("%2d%%  |",$pct);
+
+  print ('*' x ($pct / 2));
+  print (' ' x (50 - $pct / 4));
+  print "|\n";
+
+  sleep(60);
+}

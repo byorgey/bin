@@ -1,0 +1,30 @@
+#!/usr/bin/perl -w
+
+unless(@ARGV) { print "Error: no query specified.\n"; exit; }
+
+print "Searching ph for \"@ARGV\"... ";
+
+open(PHQ,"/home/brent/bin/ph @ARGV return email name phone |") 
+    or die "Cannot run ph: $!";
+
+<PHQ>;  # strip first dash-line
+
+my($output,$count) = ('',0);
+
+my($name, $phone, $email) = qw/noName noPhone noEmail/;
+
+while(<PHQ>) {
+    if(m/^---/) {
+        $output .= "$email\t$name\t$phone\n";
+        $count++;
+        ($name, $phone, $email) = qw/noName noPhone noEmail/;
+    } elsif(m/^\s*name: (.*)\s*$/) {
+        $name = $1;
+    } elsif(m/^\s*phone: (.*)\s*$/) {
+        $phone = $1;
+    } elsif(m/^\s*email: (.*)\s*$/) {
+        $email = $1;
+    }
+}
+
+print($count, " results.\n", $output);
