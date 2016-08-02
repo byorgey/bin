@@ -1,6 +1,7 @@
 import           Control.Applicative
-import           Control.Monad       (forM_)
-import           Data.List           (sortBy)
+import           Control.Monad       (forM_, when)
+import           Data.List           (isPrefixOf, sortBy)
+import           Data.Maybe          (listToMaybe)
 import           Data.Ord            (comparing)
 import           System.IO
 import           System.Process
@@ -40,6 +41,11 @@ markTasks (task1:rest) = do
         then mark nextTask >> markTasks' nextTask tasks
         else markTasks' selTask tasks
 
+unmarkAll :: IO ()
+unmarkAll = do
+  marked <- readMarkedTasks
+  forM_ marked depri
+
 readMarkedTasks :: IO [Task]
 readMarkedTasks =
   (reverse . sortBy (comparing taskNum)
@@ -55,21 +61,45 @@ doMarkedTasks = do
     []     -> return ()
     (t:ts) -> do
       putStrLn $ "\n*** Next: " ++ niceText t
-      doneOrReadd t
-      doMarkedTasks
+      continue <- oneTask t
+      when continue $ doMarkedTasks
 
-doneOrReadd t = do
-  putStr $ "  (d)one, (r)eadd? "
+depri :: Task -> IO ()
+depri t = callCommand $ "todo.sh depri " ++ show (taskNum t)
+
+oneTask :: Task -> IO Bool
+oneTask t = do
+  let caseNums = map tail (filter ("#" `isPrefixOf`) (words (text t)))
+      prompt = "  " ++ concat ["(c)ase, " | not (null caseNums)]
+                    ++ "(d)one, (r)eadd, (q)uit? "
+  putStr prompt
   hFlush stdout
 
   ans <- getLine
   case ans of
-    "d" -> callCommand $ "todo.sh do " ++ show (taskNum t)
+    "c" -> mapM_ visitCase caseNums >> oneTask t
+    "d" -> do
+      mapM_ closeCase caseNums
+      callCommand $ "todo.sh do " ++ show (taskNum t)
+      return True
     "r" -> do
-      callCommand $ "todo.sh depri " ++ show (taskNum t)
+      depri t
       callCommand $ "todo.sh -f -n del " ++ show (taskNum t)
       callCommand $ "todo.sh add '" ++ text t ++ "'"
-    _   -> doneOrReadd t
+      return True
+    "q" -> do
+      unmarkAll
+      return False
+    _   -> oneTask t
+
+visitCase n = callCommand $ "firefox https://byorgey.fogbugz.com/f/cases/" ++ show n
+
+closeCase n = do
+  token <- (head . lines) <$> readFile "/home/brent/local/secret/fogbugz-token"
+  callCommand $ curl ++ "'https://byorgey.fogbugz.com/api.asp?cmd=resolve&ixBug=" ++ n ++ "&token=" ++ token ++ "' >/dev/null"
+  callCommand $ curl ++ "'https://byorgey.fogbugz.com/api.asp?cmd=close&ixBug=" ++ n ++ "&token=" ++ token ++ "' >/dev/null"
+  where
+    curl = "curl -s -H \"Accept: application/xml\" -H \"Content-Type: application/xml\" -X GET "
 
 main = do
   todos <- readFile "/home/brent/notes/todo/todo.txt"
