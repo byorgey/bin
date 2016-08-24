@@ -2,31 +2,25 @@
 
 module Blink where
 
-import           Control.Arrow      (first)
-import           Control.Concurrent (threadDelay)
-import           Control.Monad      (when)
+import           Control.Arrow               (first)
+import           Control.Concurrent          (threadDelay)
+import           Control.Monad               (when)
 import           Data.Colour
 import           Data.Colour.Names
 import           Data.Colour.SRGB
-import           Data.List          (find)
+import           Data.List                   (find, sortBy)
+import           Data.Ord                    (comparing)
 import           Data.Time
-import           System.Environment (getArgs)
+import           Data.Time.Calendar.WeekDate
+import           System.Environment          (getArgs)
 import           System.Process
 import           Text.Printf
-
-{- To do:
-
-   * Change intervals type to use hours + minutes instead of seconds, and
-     convert internally
-   * Fix greater-than-or-equal-to bug?
-   * Debugging output
--}
-
 
 data BlinkCommand
   = Off
   | On (Colour Double)
   | Quit
+  deriving Show
 
 colorToHex :: Colour Double -> String
 colorToHex c = hex r ++ hex g ++ hex b
@@ -41,18 +35,21 @@ runBlinkCommand c    = callProcess "blink1-tool" (blinkArgs c)
     blinkArgs Off      = ["--off"]
     blinkArgs (On clr) = ["--rgb=" ++ colorToHex clr]
 
--- | Seconds since midnight
-type Seconds = Int
+-- | Minutes since midnight
+type Minutes = Int
+
+-- | Day of the week, 0 = Sunday
+type DOW = Int
 
 -- Invariant: should be sorted by time
-type BlinkIntervals = [(Seconds, BlinkCommand)]
+type BlinkIntervals = [(Minutes, BlinkCommand)]
 
 blinkIntervals :: BlinkIntervals -> IO ()
 blinkIntervals intervals = go Nothing
   where
     go current = do
       delay 1
-      secs <- currentSeconds
+      secs <- fst <$> currentTime
       let int = findInterval secs intervals
       case int of
         Nothing -> go current
@@ -62,12 +59,15 @@ blinkIntervals intervals = go Nothing
             Quit -> return ()
             _    -> go $ Just time
 
-currentSeconds :: IO Seconds
-currentSeconds = do
-  tod <- (localTimeOfDay . zonedTimeToLocalTime) <$> getZonedTime
-  return $ todHour tod * 60 + todMin tod
+currentTime :: IO (Minutes, DOW)
+currentTime = do
+  loc <- zonedTimeToLocalTime <$> getZonedTime
+  let tod  = localTimeOfDay loc
+      secs = todHour tod * 60 + todMin tod
+      dow  = (\(_,_,w) -> w `mod` 7) . toWeekDate . localDay $ loc
+  return (secs, dow)
 
-findInterval :: Seconds -> BlinkIntervals -> Maybe (Seconds, BlinkCommand)
+findInterval :: Minutes -> BlinkIntervals -> Maybe (Minutes, BlinkCommand)
 findInterval secs = safeLast . takeWhile ((<= secs) . fst)
   where
     safeLast [] = Nothing
@@ -79,22 +79,53 @@ delay secs = threadDelay (1000000 * secs)
 twoMinutes :: BlinkIntervals
 twoMinutes = [(784, On red), (785, On blue), (786, Quit)]
 
-classCommands = [On cyan, On green, On blue, On purple, On yellow, On red, Quit]
+classCommands = [On orange, On cyan, On green, On blue, On purple, On yellow, On red, Quit]
 
-fp :: BlinkIntervals
-fp = zip [794, 795, 840, 855, 865, 868, 870] classCommands
+hrs :: Int -> Minutes
+hrs h
+  | h < 8     = 60 * (h + 12)
+  | otherwise = 60 * h
 
-algo :: BlinkIntervals
-algo = zip [489, 490, 515, 525, 535, 538, 540] classCommands
+trOffsets :: [Minutes]
+trOffsets = [-200, -1, 0, 45, 60, 70, 73, 75]
 
-intro :: BlinkIntervals
-intro = (map . first) (+180) algo
+mwfOffsets :: [Minutes]
+mwfOffsets = [-200, -1, 0, 25, 35, 45, 48, 50]
+
+time :: Int -> Int -> Minutes
+time h m = hrs h + m
+
+data Period = Period { pdOffsets :: [Minutes], pdDays :: [DOW], pdName :: String, pdStart :: Minutes }
+  deriving Show
+
+pdIntervals :: Period -> BlinkIntervals
+pdIntervals p = zip (map (pdStart p +) (pdOffsets p)) classCommands
+
+a1, a2, a3, a4, a5, a6, a7, a8 :: Period
+[a1, a2, a3, a4, a5, a6, a7, a8]
+  = zipWith (Period mwfOffsets [1,3,5])
+      (map (("A"++) . show) [1..8])
+      (map (\h -> time h 10) [8,9,10,11,12,1,2,3])
+
+b1, b2, b3, b4 :: Period
+[b1, b2, b3, b4] = zipWith (Period trOffsets [2,4])
+  (map (("B"++) . show) [1..4])
+  [time 8 15, time 9 45, time 1 15, time 2 45]
+
+pdList :: [Period]
+pdList = [a1,a2,a3,a4,a5,a6,a7,a8,b1,b2,b3,b4]
+
+dowString :: DOW -> String
+dowString = (["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]!!)
 
 main :: IO ()
 main = do
-  args <- getArgs
-  case args of
-    ["fp"]    -> blinkIntervals fp
-    ["algo"]  -> blinkIntervals algo
-    ["intro"] -> blinkIntervals intro
-    _         -> putStrLn "Please choose fp, algo, or intro"
+  (now, today) <- currentTime
+  putStrLn $ "Today is " ++ dowString today ++ "."
+  let thePd = head
+            . sortBy (comparing (\p -> abs (pdStart p - now)))
+            . filter (\p -> today `elem` pdDays p)
+            $ pdList
+  putStrLn $ "Closest period is " ++ pdName thePd ++ "."
+  blinkIntervals (pdIntervals thePd)
+
