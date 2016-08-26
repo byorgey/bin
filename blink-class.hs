@@ -19,6 +19,7 @@ import           Text.Printf
 data BlinkCommand
   = Off
   | On (Colour Double)
+  | Blink (Colour Double) Int
   | Quit
   deriving Show
 
@@ -32,8 +33,9 @@ runBlinkCommand :: BlinkCommand -> IO ()
 runBlinkCommand Quit = runBlinkCommand Off
 runBlinkCommand c    = callProcess "blink1-tool" (blinkArgs c)
   where
-    blinkArgs Off      = ["--off"]
-    blinkArgs (On clr) = ["--rgb=" ++ colorToHex clr]
+    blinkArgs Off           = ["--off"]
+    blinkArgs (On clr)      = ["--rgb=" ++ colorToHex clr]
+    blinkArgs (Blink clr n) = blinkArgs (On clr) ++ ["--blink=" ++ show n]
 
 -- | Minutes since midnight
 type Minutes = Int
@@ -79,7 +81,7 @@ delay secs = threadDelay (1000000 * secs)
 twoMinutes :: BlinkIntervals
 twoMinutes = [(784, On red), (785, On blue), (786, Quit)]
 
-classCommands = [On orange, On cyan, On green, On blue, On purple, On yellow, On red, Quit]
+classCommands = [On orange, On cyan, On green, On blue, On purple, On yellow, On red, Blink red 100]
 
 hrs :: Int -> Minutes
 hrs h
