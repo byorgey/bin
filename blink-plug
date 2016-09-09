@@ -1,0 +1,5 @@
+#!/bin/sh
+
+LOGFILE=/home/brent/local/log/blink.log
+
+sudo -u brent /home/brent/local/mybin/blink-class >> $LOGFILE
