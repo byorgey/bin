@@ -8,7 +8,7 @@ import           Control.Monad               (when)
 import           Data.Colour
 import           Data.Colour.Names
 import           Data.Colour.SRGB
-import           Data.List                   (find, sortBy)
+import           Data.List                   (find, intercalate, sortBy)
 import           Data.Ord                    (comparing)
 import           Data.Time
 import           Data.Time.Calendar.WeekDate
@@ -23,19 +23,24 @@ data BlinkCommand
   | Quit
   deriving Show
 
-colorToHex :: Colour Double -> String
-colorToHex c = hex r ++ hex g ++ hex b
+showColor :: Colour Double -> String
+showColor c = intercalate "," (map show [r,g,b])
   where
     RGB r g b = toSRGB24 c
-    hex = printf "%02x"
 
 runBlinkCommand :: BlinkCommand -> IO ()
 runBlinkCommand Quit = runBlinkCommand Off
-runBlinkCommand c    = callProcess "blink1-tool" (blinkArgs c)
+runBlinkCommand c    = do
+    putStrLn (debugMsg c)
+    putStrLn $ "blink1-tool " ++ intercalate " " (blinkArgs c)
+    callProcess "/home/brent/local/bin/blink1-tool" (blinkArgs c)
   where
     blinkArgs Off           = ["--off"]
-    blinkArgs (On clr)      = ["--rgb=" ++ colorToHex clr]
+    blinkArgs (On clr)      = ["--rgb", showColor clr]
     blinkArgs (Blink clr n) = blinkArgs (On clr) ++ ["--blink=" ++ show n]
+    debugMsg Off = "Turning off..."
+    debugMsg (On clr) = "Changing to color " ++ show clr ++ "..."
+    debugMsg (Blink clr n) = "Blinnking color " ++ show clr ++ " " ++ show n ++ " times..."
 
 -- | Minutes since midnight
 type Minutes = Int
