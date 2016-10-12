@@ -2,9 +2,9 @@
 
 unzip *.zip
 
-ls *18* | cut -f 1 -d '_' | cut -f 2 -d ' ' | sort | uniq | xargs mkdir -p
+ls *assignsubmission* | cut -f 1 -d '_' | cut -f 2 -d ' ' | sort | uniq | xargs mkdir -p
 
-for f in *18*; do
+for f in *assignsubmission*; do
   NAME=${f/_*/}
   NAME=`echo $NAME | cut -f 2 -d ' '`
   FILE=${f/*_assignsubmission_file_/}
