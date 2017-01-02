@@ -1,5 +1,6 @@
 import           Control.Applicative
 import           Control.Monad       (forM_, when)
+import           Data.Char           (toLower)
 import           Data.List           (isPrefixOf, sortBy)
 import           Data.Maybe          (listToMaybe)
 import           Data.Ord            (comparing)
@@ -26,6 +27,7 @@ markTasks [] = return ()
 markTasks (task1:rest) = do
   mark task1
   markTasks' task1 rest
+  callCommand "todo.sh archive"
   where
     markTasks' :: Task -> [Task] -> IO ()
     markTasks' selTask [] = return ()
@@ -33,13 +35,22 @@ markTasks (task1:rest) = do
       putStrLn "\nWould you like to"
       putStrLn $ "  " ++ niceText nextTask
       putStrLn "before"
-      putStr $ "  " ++ niceText selTask ++ " ?  "
+      putStr $ "  " ++ niceText selTask ++ " ? ([y]es/[n]o/[d]elete/[f]inish) "
       hFlush stdout
 
-      ans <- getLine
-      if ans == "y" || ans == "Y"
-        then mark nextTask >> markTasks' nextTask tasks
-        else markTasks' selTask tasks
+      ans <- map toLower <$> getLine
+      selTask' <- case ans of
+        "y" -> do mark nextTask
+                  return nextTask
+        "d" -> do putStrLn "Deleting..."
+                  callCommand $ "todo.sh -f -N del " ++ show (taskNum nextTask)
+                  return selTask
+        "f" -> do putStrLn "Marking complete..."
+                  callCommand $ "todo.sh -a do " ++ show (taskNum nextTask)
+                  return selTask
+        _   -> return selTask
+
+      markTasks' selTask' tasks
 
 unmarkAll :: IO ()
 unmarkAll = do
