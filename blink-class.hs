@@ -56,8 +56,8 @@ blinkIntervals intervals = go Nothing
   where
     go current = do
       delay 1
-      secs <- fst <$> currentTime
-      let int = findInterval secs intervals
+      mins <- fst <$> currentTime
+      let int = findInterval mins intervals
       case int of
         Nothing -> go current
         Just (time, cmd) -> do
@@ -70,12 +70,12 @@ currentTime :: IO (Minutes, DOW)
 currentTime = do
   loc <- zonedTimeToLocalTime <$> getZonedTime
   let tod  = localTimeOfDay loc
-      secs = todHour tod * 60 + todMin tod
+      mins = todHour tod * 60 + todMin tod
       dow  = (\(_,_,w) -> w `mod` 7) . toWeekDate . localDay $ loc
-  return (secs, dow)
+  return (mins, dow)
 
 findInterval :: Minutes -> BlinkIntervals -> Maybe (Minutes, BlinkCommand)
-findInterval secs = safeLast . takeWhile ((<= secs) . fst)
+findInterval mins = safeLast . takeWhile ((<= mins) . fst)
   where
     safeLast [] = Nothing
     safeLast xs = Just $ last xs
