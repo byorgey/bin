@@ -70,6 +70,7 @@ exts =
     , "ods"
     , "ppt"
     , "pptx"
+    , "odp"
     ]
 
   , "firefox" ==>
