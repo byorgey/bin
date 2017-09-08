@@ -4,19 +4,24 @@ import           Data.Char           (toLower)
 import           Data.List           (isPrefixOf, sortBy)
 import           Data.Maybe          (listToMaybe)
 import           Data.Ord            (comparing)
+import           System.Environment  (getArgs)
 import           System.IO
 import           System.Process
 
-data Task = Task { taskNum :: Int, text :: String }
+data Task = Task { taskNum :: Int, text :: String, marked :: Bool }
   deriving Show
 
-mkTask = Task
-
-parseTask = parseTask' . words
+mkTask n s = Task n s' mark
   where
-    parseTask' (n:txt) = Task (read n) (unwords txt)
+    (mark, s') = case words s of
+      ("(M)":rest) -> (True, unwords rest)
+      _            -> (False, s)
 
-mark (Task n _) = callCommand $ "todo.sh pri " ++ show n ++ " M"
+parseMarkedTask = parseTask' . words
+  where
+    parseTask' (n:txt) = Task (read n) (unwords txt) True
+
+mark (Task n _ _) = callCommand $ "todo.sh pri " ++ show n ++ " M"
 
 niceText = nicify . text
   where
@@ -35,7 +40,7 @@ markTasks (task1:rest) = do
       putStrLn "\nWould you like to"
       putStrLn $ "  " ++ niceText nextTask
       putStrLn "before"
-      putStr $ "  " ++ niceText selTask ++ " ? ([y]es/[n]o/[d]elete/[f]inish) "
+      putStr $ "  " ++ niceText selTask ++ " ? ([y]es/[n]o/[d]elete/[f]inish/[a]bort) "
       hFlush stdout
 
       ans <- map toLower <$> getLine
@@ -45,12 +50,14 @@ markTasks (task1:rest) = do
         "d" -> do putStrLn "Deleting..."
                   callCommand $ "todo.sh -f -N del " ++ show (taskNum nextTask)
                   return selTask
-        "f" -> do putStrLn "Marking complete..."
-                  callCommand $ "todo.sh -a do " ++ show (taskNum nextTask)
+        "f" -> do completeTask ["-a"] nextTask
                   return selTask
         _   -> return selTask
 
-      markTasks' selTask' tasks
+      case ans of
+        "a" -> do putStrLn "Aborting task marking..."
+                  unmarkAll
+        _   -> markTasks' selTask' tasks
 
 unmarkAll :: IO ()
 unmarkAll = do
@@ -60,7 +67,7 @@ unmarkAll = do
 readMarkedTasks :: IO [Task]
 readMarkedTasks =
   (reverse . sortBy (comparing taskNum)
-   . map parseTask
+   . map parseMarkedTask
    . reverse . drop 2 . reverse
    . lines)
   <$> readProcess "todo.sh" ["-p", "-P", "listpri", "M"] ""
@@ -78,11 +85,14 @@ doMarkedTasks = do
 depri :: Task -> IO ()
 depri t = callCommand $ "todo.sh depri " ++ show (taskNum t)
 
+getCaseNums :: Task -> [String]
+getCaseNums t = map tail (filter ("#" `isPrefixOf`) (words (text t)))
+
 oneTask :: Task -> IO Bool
 oneTask t = do
-  let caseNums = map tail (filter ("#" `isPrefixOf`) (words (text t)))
+  let caseNums = getCaseNums t
       prompt = "  " ++ concat ["(c)ase, " | not (null caseNums)]
-                    ++ "(d)one, (r)eadd, (q)uit? "
+                    ++ "(d)one, (r)eadd, (s)top, (q)uit? "
   putStr prompt
   hFlush stdout
 
@@ -90,18 +100,22 @@ oneTask t = do
   case ans of
     "c" -> mapM_ visitCase caseNums >> oneTask t
     "d" -> do
-      mapM_ closeCase caseNums
-      callCommand $ "todo.sh do " ++ show (taskNum t)
+      completeTask [] t
       return True
     "r" -> do
       depri t
       callCommand $ "todo.sh -f -n del " ++ show (taskNum t)
       callCommand $ "todo.sh add '" ++ text t ++ "'"
       return True
-    "q" -> do
-      unmarkAll
-      return False
+    "s" -> return False
+    "q" -> unmarkAll >> return False
     _   -> oneTask t
+
+completeTask :: [String] -> Task -> IO ()
+completeTask args t = do
+  putStrLn "Marking complete..."
+  mapM_ closeCase (getCaseNums t)
+  callCommand $ "todo.sh " ++ unwords args ++ " do " ++ show (taskNum t)
 
 visitCase n = callCommand $ "firefox https://byorgey.fogbugz.com/f/cases/" ++ show n
 
@@ -112,9 +126,16 @@ closeCase n = do
   where
     curl = "curl -s -H \"Accept: application/xml\" -H \"Content-Type: application/xml\" -X GET "
 
+-- TODO: parse prioritization indicators, then auto-detect whether to continue or mark
+-- based on presence of any existing marks.
 main = do
   todos <- readFile "/home/brent/notes/todo/todo.txt"
   let tasks = zipWith mkTask [1..] (lines todos)
 
-  markTasks tasks
-  doMarkedTasks
+  case any marked tasks of
+    True -> do
+      putStrLn "Continuing..."
+      doMarkedTasks
+    False -> do
+      markTasks tasks
+      doMarkedTasks
