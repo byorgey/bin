@@ -41,9 +41,10 @@ exts =
     [ "ps"
     ]
 
-  , "tar -xvzf" ==>
+  , "tar -xzf" ==>
     [ "tgz"
     , "tar.gz"
+    , "tar.xz"
     ]
 
   , "gunzip" ==>
