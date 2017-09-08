@@ -68,6 +68,7 @@ exts =
     , "xls"
     , "xlsx"
     , "ods"
+    , "odt"
     , "ppt"
     , "pptx"
     , "odp"
