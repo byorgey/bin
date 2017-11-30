@@ -1,3 +1,5 @@
+-- Compile to 'rc'
+
 import           Control.Monad
 import           System.Directory
 import           System.FilePath
