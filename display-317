@@ -2,4 +2,4 @@ SIZE=1920x1080
 # SIZE=1280x720
 # SIZE=1024x768
 xrandr --size $SIZE
-xrandr --output HDMI-1 --auto --output DP-1 --size $SIZE --same-as HDMI-1
+xrandr --output HDMI-1 --auto --output eDP-1 --size $SIZE --same-as HDMI-1
