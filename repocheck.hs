@@ -1,5 +1,7 @@
 -- Compile to 'rc'
 
+import           Data.List        (isPrefixOf)
+
 import           Control.Monad
 import           System.Directory
 import           System.Exit
@@ -7,7 +9,6 @@ import           System.FilePath
 import           System.Process
 
 -- TODO:
---   1. show darcs # ahead?
 --   2. colorize output?
 --   3. inline, interactive rectification (i.e. opportunity to record
 --   and push in each repo before moving on to the next)?
@@ -39,12 +40,18 @@ checkDarcsRepo home repo = do
                       (shell "darcs whatsnew -s --look-for-adds")
                         { cwd = Just (home </> repo) }
                       ""
-  case exit of
-    ExitFailure 1 -> return (False, 0)
-    ExitSuccess   -> return (True, 0)
-    ExitFailure e -> do
-      putStrLn $ "Unknown exit failure from darcs: " ++ show e
-      return (True, 0)
+  let dirty = case exit of
+        ExitFailure _ -> False
+        ExitSuccess   -> True
+
+  out <- readCreateProcess
+           (shell "darcs push --dry-run")
+             { cwd = Just (home </> repo) }
+           ""
+
+  let ahead = length . filter ("patch" `isPrefixOf`) . lines $ out
+
+  return (dirty, ahead)
 
 checkRepo :: FilePath -> FilePath -> IO Bool   -- True <=> clean
 checkRepo home repo = do
