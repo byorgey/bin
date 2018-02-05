@@ -2,19 +2,21 @@
 
 import           Control.Monad
 import           System.Directory
+import           System.Exit
 import           System.FilePath
 import           System.Process
 
 -- TODO:
---   1. autodetect git vs darcs
+--   1. show darcs # ahead?
 --   2. colorize output?
 --   3. inline, interactive rectification (i.e. opportunity to record
 --   and push in each repo before moving on to the next)?
 --   hmm... seems like more trouble than it's worth.  Just open a new
 --   terminal.
 
-checkRepo :: FilePath -> FilePath -> IO Bool   -- True <=> clean
-checkRepo home repo = do
+checkGitRepo :: FilePath -> FilePath -> IO (Bool, Int)
+  -- True <=> dirty, # ahead
+checkGitRepo home repo = do
   out <- readCreateProcess
            (shell "git status --porcelain 2> /dev/null | tail -n1")
              { cwd = Just (home </> repo) }
@@ -27,6 +29,29 @@ checkRepo home repo = do
            ""
 
   let ahead = read out :: Int
+
+  return (dirty, ahead)
+
+checkDarcsRepo :: FilePath -> FilePath -> IO (Bool, Int)
+checkDarcsRepo home repo = do
+  -- putStrLn $ "Checking darcs repo: " ++ repo
+  (exit, out, _) <- readCreateProcessWithExitCode
+                      (shell "darcs whatsnew -s --look-for-adds")
+                        { cwd = Just (home </> repo) }
+                      ""
+  case exit of
+    ExitFailure 1 -> return (False, 0)
+    ExitSuccess   -> return (True, 0)
+    ExitFailure e -> do
+      putStrLn $ "Unknown exit failure from darcs: " ++ show e
+      return (True, 0)
+
+checkRepo :: FilePath -> FilePath -> IO Bool   -- True <=> clean
+checkRepo home repo = do
+  isGit <- (".git" `elem`) <$> listDirectory (home </> repo)
+  (dirty, ahead) <- case isGit of
+    True  -> checkGitRepo home repo
+    False -> checkDarcsRepo home repo
 
   when (dirty || ahead > 0) $ do
     putStrLn $ (if dirty then "! " else "  ") ++
