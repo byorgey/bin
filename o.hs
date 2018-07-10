@@ -73,6 +73,7 @@ exts =
     , "ppt"
     , "pptx"
     , "odp"
+    , "rtf"
     ]
 
   , "firefox" ==>
