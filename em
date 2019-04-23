@@ -1,1 +1,1 @@
-emacs25 -name "$1" "$1" &
+emacs -name "$1" "$1" &
