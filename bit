@@ -1,0 +1,10 @@
+#!/bin/sh
+case $1 in
+clone)
+  git clone git@bitbucket.org:byorgey/$2.git $3
+  ;;
+*)
+  echo "Unrecognized command: $1"
+  ;;
+esac
+
