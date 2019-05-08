@@ -63,6 +63,10 @@ exts =
     [ "zip"
     ]
 
+  , "p7zip -d" ==>
+    [ "7z"
+    ]
+
   , "soffice" ==>
     [ "doc"
     , "docx"
