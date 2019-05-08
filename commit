@@ -1,0 +1,65 @@
+#!/bin/bash
+
+####
+#### Customise these settings:
+####
+
+#
+# Enter your commits.to URL including protocol.
+# Don't put a slash at the end.
+# E.g., 'http://alice.commits.to'
+#
+BASE_URL='http://byorgey.commits.to'
+
+#
+# Edit this to contain a command that will PASTE text FROM your clipboard:
+#
+CLIPBOARD_PASTE_COMMAND='/usr/bin/xclip -o -selection CLIPBOARD'
+
+#
+# Edit this to contain a command that will COPY text from standard input TO your clipboard:
+#
+CLIPBOARD_COPY_COMMAND='/usr/bin/xclip -i -selection CLIPBOARD'
+
+#
+# Edit this to contain a command that will open a URL in your default browser:
+#
+URL_OPEN_COMMAND='/usr/bin/xdg-open'
+
+####
+#### End of customisation.
+####
+
+# get provided argument or contents of clipboard:
+if [ $# -gt 0 ]
+then
+    text="$@"
+else
+    text=$($CLIPBOARD_PASTE_COMMAND)
+fi
+# text="These are some words that you can use instead of the above line to test the regex below. I'll do some action by 11pm tomorrow. This sentence is not part of the commitment. Nor this"
+
+# match the first string that starts with "I will" or similar and ends with . or end of string; also remove bad characters:
+commitment=$(echo $text | perl -pe "s/.*(I will|I shall|I'll|I should)\s*(.+?)(\.|\!|$).*/\$2/i; s/ +/_/g; s/[^a-zA-Z0-9._-]//g")
+url=$BASE_URL/$commitment
+
+# display the URL:
+echo
+echo "$url"
+echo
+read -p "Want to make this commitment? [Y/n] " proceed
+proceed=${proceed:-Y}
+
+if [ "$proceed" == "Y" ] || [ "$proceed" == "y" ] ; then
+	# open the URL in your browser:
+	$($URL_OPEN_COMMAND "$url")
+
+	# copy the URL to your clipboard:
+	echo "$url" | $CLIPBOARD_COPY_COMMAND
+
+	echo
+	echo "Great! Copied to clipboard: $url"
+else
+	echo
+	echo "Commitment not made."
+fi
