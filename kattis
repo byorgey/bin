@@ -1,0 +1,18 @@
+#!/bin/zsh
+
+setopt NULL_GLOB
+
+if [[ "$1" = submit ]]
+then
+    shift
+    if [[ -e "$1" ]]
+    then
+        python3 $HOME/src/kattis-cli/submit.py "$@"
+    else
+        for f in ./*.{hs,kt,java}; do
+            python3 $HOME/src/kattis-cli/submit.py "$f"
+        done
+    fi
+else
+    $HOME/learning/Kattis/Tools/$@
+fi
