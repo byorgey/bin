@@ -1,2 +1,0 @@
-xrandr --size 1024x768
-xrandr --output VGA1 --auto --output eDP1 --size 1024x768 --same-as VGA1
