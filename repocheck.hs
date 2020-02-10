@@ -55,16 +55,25 @@ checkDarcsRepo home repo = do
 
 checkRepo :: FilePath -> FilePath -> IO Bool   -- True <=> clean
 checkRepo home repo = do
-  isGit <- (".git" `elem`) <$> listDirectory (home </> repo)
-  (dirty, ahead) <- case isGit of
-    True  -> checkGitRepo home repo
-    False -> checkDarcsRepo home repo
+  e <- doesDirectoryExist (home </> repo)
+  case e of
+    False -> putStrLn (repo ++ " does not exist, skipping") >> return True
+    _     -> do
+      ls <- listDirectory (home </> repo)
+      let isGit   = ".git" `elem` ls
+          isDarcs = "_darcs" `elem` ls
+      (dirty, ahead) <- case (isGit, isDarcs) of
+        (True, _) -> checkGitRepo home repo
+        (_, True) -> checkDarcsRepo home repo
+        _         -> do
+          putStrLn $ repo ++ " does not seem to be a repository, skipping"
+          return (False, 0)
 
-  when (dirty || ahead > 0) $ do
-    putStrLn $ (if dirty then "! " else "  ") ++
-               (if ahead > 0 then (show ahead) else " ") ++ " " ++ repo
+      when (dirty || ahead > 0) $ do
+        putStrLn $ (if dirty then "! " else "  ") ++
+                   (if ahead > 0 then (show ahead) else " ") ++ " " ++ repo
 
-  return (not dirty && ahead == 0)
+      return (not dirty && ahead == 0)
 
 main :: IO ()
 main = do
