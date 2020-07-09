@@ -1,0 +1,8 @@
+#!/bin/zsh
+N=`grep 'grade:' $HOME/learning/Kattis/**/*.{hs,java} | wc -l`
+OLD=`cat $HOME/local/data/graded.txt`
+if [[ "${N}" != "${OLD}" ]]
+then
+    echo "${N}" > $HOME/local/data/graded.txt
+    bmndr grade-kattis "${N}"
+fi
