@@ -1,0 +1,26 @@
+#!/bin/zsh
+
+# Assumptions: the PWD is full of files with names of the form
+#
+#   Foo Bar - blah blah.png
+#
+# or whatever.  Foo Bar---the part up to the first hyphen---is taken
+# as the name of a student.  For each such unique student name, a
+# directory is created, and all files beginning with that student name
+# are moved into the corresponding directory.
+#
+# In particular this is how files from a DropBox file request come.
+#
+# Correctly handles (1) student names with apostrophes, (2) multiple
+# spaces between names (e.g. 'Sam Smith' and 'Sam Smith' are
+# considered the same).
+
+# Create directories based on student names
+ls | cut -d'-' -f 1 | sed 's/ \+/ /g' | sed 's/ $//g' | sort | uniq | perl -pe 's/\n/\0/;' | xargs -0 mkdir
+
+# Put each regular file in its corresponding directory
+for f in *(.)
+do
+  NAME=`echo $f | cut -d'-' -f 1 | sed 's/ \+/ /g' | sed 's/ $//g'`
+  mv "$f" "$NAME"  # has to be "..." to handle student names with apostrophes (O'Reilly)
+done
