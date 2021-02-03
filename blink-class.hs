@@ -112,12 +112,21 @@ a1, a2, a3, a4, a5, a6, a7, a8 :: Period
 [a1, a2, a3, a4, a5, a6, a7, a8]
   = zipWith (Period mwfOffsets [1,3,5])
       (map (("A"++) . show) [1..8])
-      (map (\h -> time h 10) [8,9,10,11,12,1,2,3])
+      covidMWFTimes
+
+dayHours = [8,9,10,11,12,1,2,3]
+
+normalMWFTimes = map (\h -> time h 10) dayHours
+covidMWFTimes  = zipWith time dayHours (iterate (+5) 10)
 
 b1, b2, b3, b4 :: Period
-[b1, b2, b3, b4] = zipWith (Period trOffsets [2,4])
-  (map (("B"++) . show) [1..4])
-  [time 8 15, time 9 45, time 1 15, time 2 45]
+[b1, b2, b3, b4]
+  = zipWith (Period trOffsets [2,4])
+      (map (("B"++) . show) [1..4])
+      covidTRTimes
+
+normalTRTimes = [time 8 15, time 9 45, time 1 15, time 2 45]
+covidTRTimes  = [time 8 15, time 9 45, time 1 45, time 3 15]
 
 pdList :: [Period]
 pdList = [a1,a2,a3,a4,a5,a6,a7,a8,b1,b2,b3,b4]
