@@ -33,7 +33,7 @@ runBlinkCommand Quit = runBlinkCommand Off
 runBlinkCommand c    = do
     putStrLn (debugMsg c)
     putStrLn $ "blink1-tool " ++ intercalate " " (blinkArgs c)
-    callProcess "/home/brent/local/bin/blink1-tool" (blinkArgs c)
+    callProcess "/home/brent/.local/bin/blink1-tool" (blinkArgs c)
   where
     blinkArgs Off           = ["--off"]
     blinkArgs (On clr)      = ["--rgb", showColor clr]
@@ -112,7 +112,7 @@ a1, a2, a3, a4, a5, a6, a7, a8 :: Period
 [a1, a2, a3, a4, a5, a6, a7, a8]
   = zipWith (Period mwfOffsets [1,3,5])
       (map (("A"++) . show) [1..8])
-      covidMWFTimes
+      normalMWFTimes
 
 dayHours = [8,9,10,11,12,1,2,3]
 
@@ -123,7 +123,7 @@ b1, b2, b3, b4 :: Period
 [b1, b2, b3, b4]
   = zipWith (Period trOffsets [2,4])
       (map (("B"++) . show) [1..4])
-      covidTRTimes
+      normalTRTimes
 
 normalTRTimes = [time 8 15, time 9 45, time 1 15, time 2 45]
 covidTRTimes  = [time 8 15, time 9 45, time 1 45, time 3 15]
