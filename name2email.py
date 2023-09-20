@@ -1,0 +1,26 @@
+#!/usr/bin/python3
+
+import re
+import sys
+from pathlib import Path
+import subprocess
+import time
+
+if len(sys.argv) < 1:
+    print("Usage: name2email.py <name>")
+    sys.exit(0)
+
+name = sys.argv[1]
+
+alias_dict = {}
+with Path("~/.aliases/stu.aliases").expanduser().open() as aliases:
+    for alias in aliases:
+        m = re.search(r"\"(.*) <(.*)>", alias)
+        if m:
+            alias_dict[m.group(1).lower()] = m.group(2)
+
+canon_name = name.lower().strip()
+if canon_name in alias_dict:
+    print(alias_dict[canon_name])
+else:
+    print(name)
