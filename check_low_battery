@@ -1,6 +1,6 @@
 #!/bin/bash
 
-POWERSUPPLY="/sys/class/power_supply/AC/online"
+POWERSUPPLY="/sys/class/power_supply/ACAD/online"
 TOO_LOW=15 # how low is too low?
 NOT_CHARGING="0"
 ICON="/usr/share/icons/ubuntu-mono-dark/status/24/battery-low.svg" # eye candy

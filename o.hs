@@ -85,6 +85,10 @@ exts =
     , "htm"
     , "svg"
     ]
+
+  , "xournalpp" ==>
+    [ "xopp"
+    ]
   ]
 
 main = do
