@@ -6,11 +6,10 @@ from pathlib import Path
 import subprocess
 import time
 
-if len(sys.argv) < 1:
-    print("Usage: name2email.py <name>")
-    sys.exit(0)
-
-name = sys.argv[1]
+if len(sys.argv) < 2:
+    name = input()
+else:
+    name = sys.argv[1]
 
 alias_dict = {}
 with Path("~/.aliases/stu.aliases").expanduser().open() as aliases:
