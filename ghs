@@ -1,0 +1,6 @@
+#!/bin/zsh
+
+HS=`ls *.hs`
+cp $HS $HS:r_graded.hs
+em $HS:r_graded.hs
+ghci $HS
