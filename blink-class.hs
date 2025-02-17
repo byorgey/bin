@@ -86,7 +86,7 @@ delay secs = threadDelay (1000000 * secs)
 twoMinutes :: BlinkIntervals
 twoMinutes = [(784, On red), (785, On blue), (786, Quit)]
 
-classCommands = [On orange, On cyan, On green, On blue, On purple, On yellow, On red, Blink red 100]
+classCommands = [On orange, On magenta, On cyan, On green, On blue, On purple, On yellow, On red, Blink red 100]
 
 hrs :: Int -> Minutes
 hrs h
@@ -94,10 +94,10 @@ hrs h
   | otherwise = 60 * h
 
 trOffsets :: [Minutes]
-trOffsets = [-200, -1, 0, 45, 60, 70, 73, 75]
+trOffsets = [-200, -5, -1, 0, 45, 60, 70, 73, 75]
 
 mwfOffsets :: [Minutes]
-mwfOffsets = [-200, -1, 0, 25, 35, 45, 48, 50]
+mwfOffsets = [-200, -5, -1, 0, 25, 35, 45, 48, 50]
 
 time :: Int -> Int -> Minutes
 time h m = hrs h + m
