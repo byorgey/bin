@@ -5,6 +5,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
 from zoneinfo import ZoneInfo
+import json
 import datetime
 import os.path
 
@@ -30,7 +31,15 @@ def authenticate_google_api():
             creds = flow.run_local_server(port=0)
         # Save the credentials for the next run
         with open('token.json', 'w') as token:
-            token.write(creds.to_json())
+            token.write(json.dumps({
+                'token': creds.token,
+                'refresh_token': creds.refresh_token,
+                'token_uri': creds.token_uri,
+                'client_id': creds.client_id,
+                'client_secret': creds.client_secret,
+                'scopes': creds.scopes
+            }))
+
     service = build('calendar', 'v3', credentials=creds)
     return service
 
