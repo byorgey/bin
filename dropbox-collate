@@ -16,7 +16,7 @@
 # considered the same).
 
 # Create directories based on student names
-ls | cut -d'-' -f 1 | sed 's/ \+/ /g' | sed 's/ $//g' | sort | uniq | perl -pe 's/\n/\0/;' | xargs -0 mkdir
+ls *(.) | cut -d'-' -f 1 | sed 's/ \+/ /g' | sed 's/ $//g' | sort | uniq | perl -pe 's/\n/\0/;' | xargs -0 mkdir
 
 # Put each regular file in its corresponding directory
 for f in *(.)
