@@ -13,3 +13,6 @@ fv
 repocheck
 rc
 TAGS
+pomo
+token.json
+client_secret_*
