@@ -2,6 +2,7 @@
 if [[ -e "../graded/$1" ]]; then
   mv "$1"/* ../graded/"$1"
   rm -f "$1"/.disco_history
+  rm -rf "$1"/.stack-work
   rmdir "$1"
 else
   mv "$1" ../graded
