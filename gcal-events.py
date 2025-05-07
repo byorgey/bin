@@ -1,5 +1,6 @@
 # https://chatgpt.com/c/66ead7a0-3cdc-8006-b99b-05a6a2e1c629
 
+from dataclasses import dataclass
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
@@ -98,22 +99,58 @@ def display_events(events, calendar_name, date):
             if 'description' in event:
                 print(f"  {event['description']}")
 
-class Event:
-    def __init__(self, timestamp, summary, description):
-        pass
+@dataclass
+class Booking:
+    start: str
+    end: str
+    person: str
+    mode: str
+    purpose: str
 
 def display_events_roam(events):
+
     for event in events:
-        format_event_roam(event)
+        if 'Booked' in event['summary']:
+            format_booking(parse_booking(event))
+        else:
+            format_event_roam(event)
 
     # TODO:
     # - extract/parse relevant info from each event, create a custom event object
     # - merge consecutive bookings by same person into one event (with combined description!)
     # - format events
 
-def format_event_roam(event):
+def parse_booking(event) -> Booking:
+    start, end = extract_interval(event)
+    summary = event['summary']
+    person = summary[8:summary.index('(') - 1]
+
+    mode = summary[summary.index('(') + 1 : summary.index(')') + 1]
+
+    description = event['description']
+    needle = 'meet about?:'
+    i = description.index(needle) + len(needle) + 1
+    j = description.index('<br />', i)
+
+    purpose = description[i:j]
+
+    return Booking(start, end, person, mode, purpose)
+
+def format_booking(booking):
+    print(f'- **{booking.start}-{booking.end}** [[meeting]] with [[person/{booking.person}]]')
+    if 'in my office' not in booking.mode:
+        print(f'    - ^^{booking.mode}^^')
+    print(f'    - {booking.purpose}')
+    print('     - {{[[TODO]]}} count office hour visit')
+
+def extract_interval(event):
     start = datetime.datetime.fromisoformat(event['start']['dateTime']).strftime('%-I:%M')
     end = datetime.datetime.fromisoformat(event['end']['dateTime']).strftime('%-I:%M')
+
+    return start,end
+
+def format_event_roam(event):
+    start, end = extract_interval(event)
 
     print(f"- **{start}-{end}** {event['summary']}")
 
