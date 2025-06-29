@@ -1,0 +1,2 @@
+#!/bin/zsh
+ls *.cabal data/**/*.sw data/**/*.yaml src/**/*.hs test/**/*.hs | entr -s 'cabal run -j -O0 swarm:exe:swarm'
