@@ -1,2 +1,2 @@
 #!/bin/zsh
-ls *.cabal data/**/*.sw data/**/*.yaml src/**/*.hs test/**/*.hs | entr -s 'cabal run -j -O0 swarm:exe:swarm'
+ls *.cabal data/**/*.sw data/**/*.yaml src/**/*.hs app/**/*.hs test/**/*.hs | entr -s 'cabal run --ghc-options="-Wall -Werror" -j -O0 swarm:exe:swarm -- $@'
